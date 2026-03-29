@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_calibrate"
+        android:icon="@drawable/ic_calibrate"
+        android:title="Calibrate"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_sound"
+        android:icon="@drawable/ic_sound_on"
+        android:title="Sound"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_theme"
+        android:icon="@drawable/ic_theme"
+        android:title="Toggle Theme"
+        app:showAsAction="ifRoom" />
+</menu>

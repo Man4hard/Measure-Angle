@@ -1,0 +1,27 @@
+<resources>
+    <!-- Dark Theme -->
+    <color name="primary">#00D4FF</color>
+    <color name="on_primary">#001F2A</color>
+    <color name="primary_container">#003547</color>
+    <color name="secondary">#A8C8FF</color>
+    <color name="tertiary">#39E75F</color>
+    <color name="surface">#0D1117</color>
+    <color name="surface_variant">#161B22</color>
+    <color name="on_surface">#E6EDF3</color>
+    <color name="on_surface_variant">#8B949E</color>
+    <color name="error">#FF6B6B</color>
+    <color name="outline">#30363D</color>
+
+    <!-- Light Theme -->
+    <color name="primary_light">#0066CC</color>
+    <color name="on_primary_light">#FFFFFF</color>
+    <color name="surface_light">#F6F8FA</color>
+    <color name="surface_variant_light">#FFFFFF</color>
+    <color name="on_surface_light">#1C2128</color>
+
+    <!-- Sensor states -->
+    <color name="level_green">#2ECC71</color>
+    <color name="warning_yellow">#F39C12</color>
+    <color name="danger_red">#E74C3C</color>
+    <color name="bubble_blue">#3498DB</color>
+</resources>

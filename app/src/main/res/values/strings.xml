@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Inclinometer</string>
+    <string name="tab_bubble">Bubble Level</string>
+    <string name="tab_digital">Digital</string>
+    <string name="tab_camera">Camera</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="save_measurement">Save Measurement</string>
+    <string name="clear_all">Clear All</string>
+    <string name="history">History</string>
+    <string name="no_measurements">No measurements saved yet</string>
+    <string name="level">LEVEL</string>
+    <string name="not_level">NOT LEVEL</string>
+    <string name="demo_mode">Demo Mode — No Physical Sensor</string>
+</resources>
