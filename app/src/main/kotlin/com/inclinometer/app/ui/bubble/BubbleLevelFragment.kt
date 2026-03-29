@@ -32,37 +32,25 @@ package com.inclinometer.app.ui.bubble
 
       override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
           super.onViewCreated(view, savedInstanceState)
-
-          // Wire up the four in-view buttons
           binding.bubbleLevelView.onCalibrateClick = {
               CalibrationDialogFragment().show(childFragmentManager, CalibrationDialogFragment.TAG)
           }
-          binding.bubbleLevelView.onSoundClick = {
-              viewModel.toggleSound()
-          }
-          binding.bubbleLevelView.onLockClick = {
+          binding.bubbleLevelView.onSoundClick   = { viewModel.toggleSound() }
+          binding.bubbleLevelView.onLockClick    = {
               binding.bubbleLevelView.isLocked = !binding.bubbleLevelView.isLocked
-              val msg = if (binding.bubbleLevelView.isLocked) "Reading locked" else "Reading unlocked"
-              Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+              Toast.makeText(requireContext(),
+                  if (binding.bubbleLevelView.isLocked) "Reading locked" else "Reading unlocked",
+                  Toast.LENGTH_SHORT).show()
               binding.bubbleLevelView.invalidate()
           }
           binding.bubbleLevelView.onSettingsClick = {
-              viewModel.toggleTheme()
-              requireActivity().recreate()
+              viewModel.toggleTheme(); requireActivity().recreate()
           }
-
-          // Observe combined UI state — sensor data + sound toggle live here
           viewLifecycleOwner.lifecycleScope.launch {
               viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                   viewModel.uiState.collect { state ->
-                      // Update bubble positions only when not locked
-                      if (!binding.bubbleLevelView.isLocked) {
-                          binding.bubbleLevelView.updateAngles(
-                              state.sensorData.pitch,
-                              state.sensorData.roll
-                          )
-                      }
-                      // Keep sound icon in sync
+                      if (!binding.bubbleLevelView.isLocked)
+                          binding.bubbleLevelView.updateAngles(state.sensorData.pitch, state.sensorData.roll)
                       binding.bubbleLevelView.isSoundEnabled = state.isSoundEnabled
                       binding.bubbleLevelView.invalidate()
                   }
@@ -70,9 +58,7 @@ package com.inclinometer.app.ui.bubble
           }
       }
 
-      override fun onDestroyView() {
-          super.onDestroyView()
-          _binding = null
-      }
+      override fun onStart()       { super.onStart();       viewModel.startSensor() }
+      override fun onStop()        { super.onStop();        viewModel.stopSensor() }
+      override fun onDestroyView() { super.onDestroyView(); _binding = null }
   }
-  
