@@ -93,8 +93,8 @@ class BubbleLevelView @JvmOverloads constructor(
 
         // Tube background
         tubeBgPaint.color = tubeColor
-        canvas.drawRoundRect(hTubeCenterZone(hTubeLeft, hTubeY, hTubeRight, hTubeY + hTubeH, cornerR), tubeBgPaint)
-        canvas.drawRoundRect(hTubeCenterZone(hTubeLeft, hTubeY, hTubeRight, hTubeY + hTubeH, cornerR), tubeBorderPaint.apply { color = tubeBorder; strokeWidth = 2.5f })
+        canvas.drawRoundRect(hTubeCenterZone(hTubeLeft, hTubeY, hTubeRight, hTubeY + hTubeH, cornerR), cornerR, cornerR, tubeBgPaint)
+        canvas.drawRoundRect(hTubeCenterZone(hTubeLeft, hTubeY, hTubeRight, hTubeY + hTubeH, cornerR), cornerR, cornerR, tubeBorderPaint.apply { color = tubeBorder; strokeWidth = 2.5f })
 
         // Tick marks on horizontal tube
         drawHorizontalTicks(canvas, hTubeLeft, hTubeRight, hTubeCy, hTubeH)
