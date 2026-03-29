@@ -1,44 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <LinearLayout
+  <FrameLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:orientation="vertical"
       android:background="#0E0E0E">
 
-      <!-- Main spirit level view — fills all space above the ad banner -->
       <com.inclinometer.app.ui.bubble.BubbleLevelView
           android:id="@+id/bubble_level_view"
           android:layout_width="match_parent"
-          android:layout_height="0dp"
-          android:layout_weight="1" />
+          android:layout_height="match_parent" />
 
-      <!-- AdMob banner placeholder — standard 50dp banner height -->
-      <!-- Replace this FrameLayout with com.google.android.gms.ads.AdView when AdMob is configured -->
-      <FrameLayout
-          android:id="@+id/ad_banner_container"
-          android:layout_width="match_parent"
-          android:layout_height="50dp"
-          android:background="#1A1A1A">
-
-          <View
-              android:layout_width="match_parent"
-              android:layout_height="1dp"
-              android:layout_gravity="top"
-              android:background="#2A2A2A" />
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              android:text="ADVERTISEMENT"
-              android:textColor="#444444"
-              android:textSize="10sp"
-              android:letterSpacing="0.15"
-              android:fontFamily="sans-serif"
-              android:textStyle="normal" />
-
-      </FrameLayout>
-
-  </LinearLayout>
+  </FrameLayout>
   
