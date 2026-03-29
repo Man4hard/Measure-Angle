@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/mainFragment">
+  <navigation xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/nav_graph"
+      app:startDestination="@id/bubbleLevelFragment">
 
-    <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.inclinometer.app.ui.main.MainFragment"
-        android:label="Inclinometer" />
+      <fragment
+          android:id="@+id/bubbleLevelFragment"
+          android:name="com.inclinometer.app.ui.bubble.BubbleLevelFragment"
+          android:label="Spirit Level" />
 
-    <fragment
-        android:id="@+id/historyFragment"
-        android:name="com.inclinometer.app.ui.history.HistoryFragment"
-        android:label="History" />
-
-</navigation>
+  </navigation>
