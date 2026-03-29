@@ -8,473 +8,480 @@ package com.inclinometer.app.ui.bubble
   import kotlin.math.*
 
   class BubbleLevelView @JvmOverloads constructor(
-      context: Context,
-      attrs: AttributeSet? = null,
-      defStyleAttr: Int = 0
-  ) : View(context, attrs, defStyleAttr) {
+      context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
+  ) : View(context, attrs, defStyle) {
 
-      private var pitch = 0f  // Y axis (forward/back tilt)
-      private var roll  = 0f  // X axis (left/right tilt)
+      var pitch = 0f
+      var roll  = 0f
+      var isSoundEnabled = true
+      var isLocked       = false
 
-      // Callback for button taps
       var onCalibrateClick: (() -> Unit)? = null
       var onSoundClick:     (() -> Unit)? = null
       var onLockClick:      (() -> Unit)? = null
       var onSettingsClick:  (() -> Unit)? = null
-      var isSoundEnabled = true
-      var isLocked = false
 
-      // Button rects for hit-testing
-      private val btnCalibrate = RectF()
-      private val btnSound     = RectF()
-      private val btnLock      = RectF()
-      private val btnSettings  = RectF()
+      private val btnRects = Array(4) { RectF() }
 
-      // ── Colours ──────────────────────────────────────────────────────────────
-      private val bgDark      = Color.parseColor("#111111")
-      private val limeA       = Color.parseColor("#AADD00")
-      private val limeB       = Color.parseColor("#668800")
-      private val limeGlass   = Color.parseColor("#CCFF44")
-      private val limeDeep    = Color.parseColor("#334400")
-      private val rimDark     = Color.parseColor("#1C1C1C")
-      private val rimGray     = Color.parseColor("#3A3A3A")
-      private val rimLight    = Color.parseColor("#555555")
-      private val stitchColor = Color.parseColor("#444444")
-      private val lcdBg       = Color.parseColor("#0B1500")
-      private val lcdText     = Color.parseColor("#88FF00")
-      private val lcdDim      = Color.parseColor("#224400")
-      private val btnBg       = Color.parseColor("#222222")
-      private val btnRim      = Color.parseColor("#404040")
-      private val iconColor   = Color.parseColor("#AAAAAA")
+      // ─── Palette (from reference image) ───────────────────────────────────────
+      private val C_BG        = Color.parseColor("#0E0E0E")
+      private val C_LIQUID_1  = Color.parseColor("#C8E600")   // top bright
+      private val C_LIQUID_2  = Color.parseColor("#8DBF00")   // mid
+      private val C_LIQUID_3  = Color.parseColor("#5A8200")   // bottom deep
+      private val C_LIQUID_4  = Color.parseColor("#A0D400")   // lower highlight
+      private val C_TUBE_CASE = Color.parseColor("#1C1C1C")
+      private val C_TUBE_RIM  = Color.parseColor("#3E3E3E")
+      private val C_BUBBLE_1  = Color.parseColor("#EEFF88")
+      private val C_BUBBLE_2  = Color.parseColor("#A8D400")
+      private val C_CROSS     = Color.parseColor("#6E9900")
+      private val C_STITCH    = Color.parseColor("#4A6600")
+      private val C_LCD_BG    = Color.parseColor("#090F00")
+      private val C_LCD_TXT   = Color.parseColor("#7AE800")
+      private val C_LCD_DIM   = Color.parseColor("#1A2A00")
+      private val C_BTN_TOP   = Color.parseColor("#2E2E2E")
+      private val C_BTN_BOT   = Color.parseColor("#181818")
+      private val C_ICON      = Color.parseColor("#999999")
+      private val C_BEZEL_1   = Color.parseColor("#484848")
+      private val C_BEZEL_2   = Color.parseColor("#181818")
+      private val C_BEZEL_3   = Color.parseColor("#5A5A5A")
 
-      // ── Paints ───────────────────────────────────────────────────────────────
-      private val bgPaint      = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val liquidPaint  = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val rimPaint     = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val glassPaint   = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val crossPaint   = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val stitchPaint  = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val lcdBgPaint   = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val lcdTextPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val lcdDimPaint  = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val btnPaint     = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val iconPaint    = Paint(Paint.ANTI_ALIAS_FLAG)
-      private val shadowPaint  = Paint(Paint.ANTI_ALIAS_FLAG)
-
-      init {
-          bgPaint.color = bgDark; bgPaint.style = Paint.Style.FILL
-          rimPaint.style = Paint.Style.STROKE; rimPaint.strokeWidth = 3f
-          glassPaint.style = Paint.Style.FILL
-          crossPaint.color = Color.argb(140, 200, 255, 0); crossPaint.style = Paint.Style.STROKE; crossPaint.strokeWidth = 1.8f
-          stitchPaint.color = stitchColor; stitchPaint.style = Paint.Style.STROKE; stitchPaint.strokeWidth = 1.5f
-          stitchPaint.pathEffect = DashPathEffect(floatArrayOf(6f, 5f), 0f)
-          lcdBgPaint.color = lcdBg; lcdBgPaint.style = Paint.Style.FILL
-          lcdTextPaint.color = lcdText; lcdTextPaint.style = Paint.Style.FILL
-          lcdTextPaint.typeface = Typeface.MONOSPACE; lcdTextPaint.textAlign = Paint.Align.CENTER
-          lcdDimPaint.color = lcdDim; lcdDimPaint.style = Paint.Style.FILL
-          lcdDimPaint.typeface = Typeface.MONOSPACE; lcdDimPaint.textAlign = Paint.Align.CENTER
-          btnPaint.style = Paint.Style.FILL
-          iconPaint.color = iconColor; iconPaint.style = Paint.Style.STROKE
-          iconPaint.strokeWidth = 3f; iconPaint.strokeCap = Paint.Cap.ROUND
-          shadowPaint.color = Color.argb(180, 0, 0, 0); shadowPaint.style = Paint.Style.FILL
-          liquidPaint.style = Paint.Style.FILL
+      // ─── Reusable paint objects ────────────────────────────────────────────────
+      private val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+      private val pStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+      private val pText   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+          style = Paint.Style.FILL
+          typeface = Typeface.MONOSPACE
+          textAlign = Paint.Align.CENTER
+      }
+      private val pStitch = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+          style = Paint.Style.STROKE
+          strokeWidth = 1.5f
+          color = C_STITCH
+          pathEffect = DashPathEffect(floatArrayOf(5f, 4f), 0f)
       }
 
-      // ──────────────────────────────────────────────────────────────────────────
+      // ─── Draw ──────────────────────────────────────────────────────────────────
       override fun onDraw(canvas: Canvas) {
-          super.onDraw(canvas)
-          val w = width.toFloat(); val h = height.toFloat()
+          val W = width.toFloat()
+          val H = height.toFloat()
+          // Background
+          pFill.color = C_BG
+          canvas.drawRect(0f, 0f, W, H, pFill)
+          drawLeather(canvas, W, H)
 
-          // Leather background
-          canvas.drawRect(0f, 0f, w, h, bgPaint)
-          drawLeatherTexture(canvas, w, h)
+          val pad = W * 0.035f
 
-          val pad = w * 0.04f
+          // 1 ── Horizontal tube
+          drawHTube(canvas,
+              l = pad,   t = H * 0.030f,
+              r = W-pad, b = H * 0.185f,
+              roll = roll)
 
-          // ── 1. HORIZONTAL TUBE (top) ─────────────────────────────────────────
-          val hTubeTop  = h * 0.03f
-          val hTubeBot  = h * 0.18f
-          val hTubeL    = pad
-          val hTubeR    = w - pad
-          drawHorizTube(canvas, hTubeL, hTubeTop, hTubeR, hTubeBot, roll)
+          // 2 ── Vertical tube
+          drawVTube(canvas,
+              l = pad,       t = H * 0.210f,
+              r = W * 0.235f, b = H * 0.695f,
+              pitch = pitch)
 
-          // ── 2. VERTICAL TUBE (left) ──────────────────────────────────────────
-          val vTubeL   = pad
-          val vTubeR   = w * 0.22f
-          val vTubeTop2 = h * 0.205f
-          val vTubeBot2 = h * 0.685f
-          drawVertTube(canvas, vTubeL, vTubeTop2, vTubeR, vTubeBot2, pitch)
+          // 3 ── Circular vial
+          val vialCx = W * 0.630f
+          val vialCy = H * 0.455f
+          val vialR  = minOf(W * 0.305f, H * 0.250f)
+          drawCircle(canvas, vialCx, vialCy, vialR, pitch, roll)
 
-          // ── 3. CIRCULAR VIAL (center-right) ──────────────────────────────────
-          val circCx = (vTubeR + 20f + (w - pad)) / 2f
-          val circCy = (vTubeTop2 + vTubeBot2) / 2f
-          val circR  = minOf(
-              (w - pad - vTubeR - 24f) / 2f,
-              (vTubeBot2 - vTubeTop2) / 2f
-          ) * 0.92f
-          drawCircularVial(canvas, circCx, circCy, circR, pitch, roll)
+          // 4 ── LCD readout
+          drawLCD(canvas,
+              l = pad,   t = H * 0.730f,
+              r = W-pad, b = H * 0.800f,
+              xDeg = -roll, yDeg = pitch)
 
-          // ── 4. LCD READOUT ────────────────────────────────────────────────────
-          val lcdTop = h * 0.71f
-          val lcdBot = h * 0.785f
-          drawLcdDisplay(canvas, pad, lcdTop, w - pad, lcdBot, roll, pitch)
-
-          // ── 5. BUTTONS ────────────────────────────────────────────────────────
-          val btnTop = h * 0.855f
-          val btnBot = h * 0.96f
-          drawButtons(canvas, pad, btnTop, w - pad, btnBot)
+          // 5 ── Buttons
+          drawButtons(canvas,
+              l = W * 0.055f, t = H * 0.860f,
+              r = W * 0.945f, b = H * 0.955f)
       }
 
-      // ── Leather texture ───────────────────────────────────────────────────────
-      private fun drawLeatherTexture(canvas: Canvas, w: Float, h: Float) {
-          val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-              color = Color.argb(18, 255, 255, 255)
-              style = Paint.Style.FILL
-          }
+      // ─── Leather background ────────────────────────────────────────────────────
+      private fun drawLeather(canvas: Canvas, W: Float, H: Float) {
+          pFill.color = Color.argb(14, 255, 255, 255)
+          val step = 20f
+          var row = 0
           var y = 0f
-          while (y < h) {
-              var x = if ((y / 18f).toInt() % 2 == 0) 0f else 9f
-              while (x < w) {
-                  canvas.drawCircle(x, y, 3.5f, p)
-                  x += 18f
+          while (y < H) {
+              val xOff = if (row % 2 == 0) 0f else step / 2f
+              var x = xOff
+              while (x < W) {
+                  canvas.drawCircle(x, y, 3f, pFill)
+                  x += step
               }
-              y += 18f
+              y += step * 0.7f
+              row++
           }
       }
 
-      // ── Horizontal tube ───────────────────────────────────────────────────────
-      private fun drawHorizTube(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, roll: Float) {
+      // ─── Horizontal tube ──────────────────────────────────────────────────────
+      private fun drawHTube(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, roll: Float) {
           val cr = (b - t) / 2f
+          val cx = (l + r) / 2f
+          val cy = (t + b) / 2f
+          val rect = RectF(l, t, r, b)
+          val outerRect = RectF(l - 8f, t - 8f, r + 8f, b + 8f)
+          val outerCr = cr + 8f
 
-          // Outer casing
-          val casingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-              style = Paint.Style.FILL
-              color = rimDark
-          }
-          canvas.drawRoundRect(RectF(l - 6f, t - 6f, r + 6f, b + 6f), cr + 6f, cr + 6f, casingPaint)
-          rimPaint.color = rimLight; rimPaint.strokeWidth = 2f
-          canvas.drawRoundRect(RectF(l - 6f, t - 6f, r + 6f, b + 6f), cr + 6f, cr + 6f, rimPaint)
+          // Outer casing shadow
+          pFill.color = Color.argb(140, 0, 0, 0)
+          canvas.drawRoundRect(RectF(outerRect.left+4, outerRect.top+4, outerRect.right+4, outerRect.bottom+4), outerCr, outerCr, pFill)
 
-          // Liquid fill — gradient green
-          val lg = LinearGradient(0f, t, 0f, b,
-              intArrayOf(limeGlass, limeA, limeB, limeA),
-              floatArrayOf(0f, 0.3f, 0.7f, 1f), Shader.TileMode.CLAMP)
-          liquidPaint.shader = lg
-          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, liquidPaint)
-          liquidPaint.shader = null
+          // Outer metal casing
+          pFill.shader = LinearGradient(0f, outerRect.top, 0f, outerRect.bottom,
+              intArrayOf(C_BEZEL_1, C_BEZEL_2, C_BEZEL_3), floatArrayOf(0f,.5f,1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(outerRect, outerCr, outerCr, pFill)
+          pFill.shader = null
 
-          // Stitched border inside
-          canvas.drawRoundRect(RectF(l + 4f, t + 4f, r - 4f, b - 4f), cr - 3f, cr - 3f, stitchPaint)
+          // Liquid fill
+          pFill.shader = LinearGradient(0f, t, 0f, b,
+              intArrayOf(C_LIQUID_1, C_LIQUID_2, C_LIQUID_3, C_LIQUID_4),
+              floatArrayOf(0f, 0.38f, 0.70f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(rect, cr, cr, pFill)
+          pFill.shader = null
 
-          // Center vertical tick
-          val cx = (l + r) / 2f; val cy = (t + b) / 2f
-          canvas.drawLine(cx, t + 4f, cx, b - 4f, crossPaint)
-          // Horizontal guide line
-          canvas.drawLine(l + 8f, cy, r - 8f, cy, crossPaint)
+          // Stitched inner border
+          pStitch.strokeWidth = 1.8f
+          canvas.drawRoundRect(RectF(l+5f, t+5f, r-5f, b-5f), cr-4f, cr-4f, pStitch)
+
+          // Center divider (vertical dashed line)
+          pStroke.color = Color.argb(120, 80, 120, 0); pStroke.strokeWidth = 2f
+          pStroke.pathEffect = DashPathEffect(floatArrayOf(4f, 4f), 0f)
+          canvas.drawLine(cx, t + cr * 0.3f, cx, b - cr * 0.3f, pStroke)
+          pStroke.pathEffect = null
+
+          // Horizontal center line
+          pStroke.color = Color.argb(100, 80, 120, 0); pStroke.strokeWidth = 1.5f
+          canvas.drawLine(l + cr, cy, r - cr, cy, pStroke)
 
           // Bubble
-          val maxTravel = (r - l) * 0.38f
-          val bx = cx + (-roll / 45f * maxTravel).coerceIn(-maxTravel, maxTravel)
-          drawBubble(canvas, bx, cy, (b - t) * 0.30f, (b - t) * 0.40f)
+          val maxX = (r - l - cr * 4f) * 0.45f
+          val bx = cx + (-roll / 45f * maxX).coerceIn(-maxX, maxX)
+          drawOvalBubble(canvas, bx, cy, (b-t) * 0.31f, (b-t) * 0.42f)
 
-          // Glass sheen top half
-          glassPaint.shader = LinearGradient(0f, t, 0f, cy,
-              intArrayOf(Color.argb(120, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(RectF(l + 2f, t + 2f, r - 2f, cy), cr - 1f, cr - 1f, glassPaint)
-          glassPaint.shader = null
+          // Glass top sheen (white gradient — upper 40%)
+          pFill.shader = LinearGradient(0f, t, 0f, t + (b - t) * 0.45f,
+              intArrayOf(Color.argb(160, 255, 255, 255), Color.argb(40, 255, 255, 255), Color.TRANSPARENT),
+              floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(RectF(l+2f, t+2f, r-2f, t + (b-t)*0.48f), cr-1f, cr-1f, pFill)
+          pFill.shader = null
+
+          // Bottom deep shadow
+          pFill.shader = LinearGradient(0f, b - (b-t)*0.25f, 0f, b,
+              intArrayOf(Color.TRANSPARENT, Color.argb(80, 0, 0, 0)), null, Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(RectF(l+2f, b-(b-t)*0.28f, r-2f, b-2f), cr-1f, cr-1f, pFill)
+          pFill.shader = null
       }
 
-      // ── Vertical tube ─────────────────────────────────────────────────────────
-      private fun drawVertTube(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, pitch: Float) {
+      // ─── Vertical tube ────────────────────────────────────────────────────────
+      private fun drawVTube(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, pitch: Float) {
           val cr = (r - l) / 2f
+          val cx = (l + r) / 2f
+          val cy = (t + b) / 2f
+          val rect = RectF(l, t, r, b)
+          val outerRect = RectF(l-8f, t-8f, r+8f, b+8f)
+          val outerCr = cr + 8f
 
-          // Outer casing
-          val casingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = rimDark }
-          canvas.drawRoundRect(RectF(l - 6f, t - 6f, r + 6f, b + 6f), cr + 6f, cr + 6f, casingPaint)
-          rimPaint.color = rimLight; rimPaint.strokeWidth = 2f
-          canvas.drawRoundRect(RectF(l - 6f, t - 6f, r + 6f, b + 6f), cr + 6f, cr + 6f, rimPaint)
+          // Shadow
+          pFill.color = Color.argb(140, 0, 0, 0)
+          canvas.drawRoundRect(RectF(outerRect.left+4, outerRect.top+4, outerRect.right+4, outerRect.bottom+4), outerCr, outerCr, pFill)
 
-          // Liquid
-          val lg = LinearGradient(l, 0f, r, 0f,
-              intArrayOf(limeGlass, limeA, limeB, limeA),
-              floatArrayOf(0f, 0.3f, 0.7f, 1f), Shader.TileMode.CLAMP)
-          liquidPaint.shader = lg
-          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, liquidPaint)
-          liquidPaint.shader = null
+          // Metal casing
+          pFill.shader = LinearGradient(l, 0f, r, 0f,
+              intArrayOf(C_BEZEL_1, C_BEZEL_2, C_BEZEL_3), floatArrayOf(0f,.5f,1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(outerRect, outerCr, outerCr, pFill)
+          pFill.shader = null
+
+          // Liquid fill
+          pFill.shader = LinearGradient(l, 0f, r, 0f,
+              intArrayOf(C_LIQUID_1, C_LIQUID_2, C_LIQUID_3, C_LIQUID_4),
+              floatArrayOf(0f, 0.38f, 0.70f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(rect, cr, cr, pFill)
+          pFill.shader = null
 
           // Stitched border
-          canvas.drawRoundRect(RectF(l + 4f, t + 4f, r - 4f, b - 4f), cr - 3f, cr - 3f, stitchPaint)
+          canvas.drawRoundRect(RectF(l+5f, t+5f, r-5f, b-5f), cr-4f, cr-4f, pStitch)
 
-          // Crosshairs
-          val cx = (l + r) / 2f; val cy = (t + b) / 2f
-          canvas.drawLine(cx, t + 8f, cx, b - 8f, crossPaint)
-          canvas.drawLine(l + 4f, cy, r - 4f, cy, crossPaint)
+          // Center horizontal dashed line
+          pStroke.color = Color.argb(120, 80, 120, 0); pStroke.strokeWidth = 2f
+          pStroke.pathEffect = DashPathEffect(floatArrayOf(4f, 4f), 0f)
+          canvas.drawLine(l+cr*0.3f, cy, r-cr*0.3f, cy, pStroke)
+          pStroke.pathEffect = null
 
-          // Tick marks (every ~15% of height)
-          val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-              color = Color.argb(100, 200, 255, 0); style = Paint.Style.STROKE; strokeWidth = 1.5f
+          // Vertical center line
+          pStroke.color = Color.argb(100, 80, 120, 0); pStroke.strokeWidth = 1.5f
+          canvas.drawLine(cx, t + cr, cx, b - cr, pStroke)
+
+          // Tick marks
+          pStroke.color = Color.argb(80, 90, 130, 0); pStroke.strokeWidth = 1.5f
+          for (i in listOf(-0.25f, 0.25f)) {
+              val ty = cy + i * (b - t)
+              canvas.drawLine(l + cr * 0.5f, ty, r - cr * 0.5f, ty, pStroke)
           }
-          for (i in -2..2) {
-              val ty = cy + i * (b - t) * 0.15f
-              if (ty > t + 8f && ty < b - 8f)
-                  canvas.drawLine(l + 6f, ty, r - 6f, ty, tickPaint)
-          }
 
-          // Bubble (moves vertically with pitch)
-          val maxTravel = (b - t) * 0.38f
-          val by = cy + (pitch / 45f * maxTravel).coerceIn(-maxTravel, maxTravel)
-          drawBubble(canvas, cx, by, (r - l) * 0.28f, (r - l) * 0.40f)
+          // Bubble
+          val maxY = (b - t - cr * 4f) * 0.44f
+          val by = cy + (pitch / 45f * maxY).coerceIn(-maxY, maxY)
+          drawOvalBubble(canvas, cx, by, (r-l) * 0.30f, (r-l) * 0.40f)
 
-          // Glass sheen left half
-          glassPaint.shader = LinearGradient(l, 0f, cx, 0f,
-              intArrayOf(Color.argb(120, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(RectF(l + 2f, t + 2f, cx, b - 2f), cr - 1f, cr - 1f, glassPaint)
-          glassPaint.shader = null
+          // Glass left sheen
+          pFill.shader = LinearGradient(l, 0f, l + (r-l)*0.5f, 0f,
+              intArrayOf(Color.argb(160, 255, 255, 255), Color.argb(40, 255, 255, 255), Color.TRANSPARENT),
+              floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(RectF(l+2f, t+2f, l+(r-l)*0.52f, b-2f), cr-1f, cr-1f, pFill)
+          pFill.shader = null
       }
 
-      // ── Circular vial ─────────────────────────────────────────────────────────
-      private fun drawCircularVial(canvas: Canvas, cx: Float, cy: Float, r: Float, pitch: Float, roll: Float) {
-          // Metallic outer rim (thick dark ring)
-          for (i in 5 downTo 0) {
-              val rimP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  style = Paint.Style.STROKE
-                  strokeWidth = (i * 3f) + 1f
-                  color = when (i) {
-                      5 -> Color.parseColor("#111111")
-                      4 -> Color.parseColor("#333333")
-                      3 -> Color.parseColor("#555555")
-                      2 -> Color.parseColor("#3A3A3A")
-                      1 -> Color.parseColor("#222222")
-                      else -> Color.parseColor("#666666")
-                  }
-              }
-              canvas.drawCircle(cx, cy, r + 10f + i * 3f, rimP)
-          }
+      // ─── Circular vial ────────────────────────────────────────────────────────
+      private fun drawCircle(canvas: Canvas, cx: Float, cy: Float, r: Float, pitch: Float, roll: Float) {
+          // Drop shadow
+          pFill.color = Color.argb(160, 0, 0, 0)
+          canvas.drawCircle(cx + 5f, cy + 6f, r + 14f, pFill)
 
-          // Green liquid fill
-          val liquidGrad = RadialGradient(cx - r * 0.2f, cy - r * 0.2f, r * 1.3f,
-              intArrayOf(limeGlass, limeA, limeB, limeDeep),
-              floatArrayOf(0f, 0.4f, 0.75f, 1f), Shader.TileMode.CLAMP)
-          liquidPaint.shader = liquidGrad
-          canvas.drawCircle(cx, cy, r, liquidPaint)
-          liquidPaint.shader = null
+          // ── Multi-layer bezel (thick metallic ring) ──
+          // Outer dark ring
+          pFill.shader = SweepGradient(cx, cy,
+              intArrayOf(C_BEZEL_1, C_BEZEL_3, C_BEZEL_2, C_BEZEL_3, C_BEZEL_1),
+              floatArrayOf(0f, 0.25f, 0.5f, 0.75f, 1f))
+          canvas.drawCircle(cx, cy, r + 16f, pFill)
+          pFill.shader = null
 
-          // Stitched border ring
-          canvas.drawCircle(cx, cy, r - 5f, stitchPaint)
+          // Bezel ring (gradient metallic)
+          pFill.shader = RadialGradient(cx, cy, r+16f,
+              intArrayOf(C_BEZEL_1, C_BEZEL_2, C_TUBE_CASE),
+              floatArrayOf(0.75f, 0.88f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawCircle(cx, cy, r + 14f, pFill)
+          pFill.shader = null
+
+          // Inner rim highlight
+          pStroke.color = C_BEZEL_3; pStroke.strokeWidth = 1.5f; pStroke.pathEffect = null
+          canvas.drawCircle(cx, cy, r + 2f, pStroke)
+
+          // Liquid fill
+          pFill.shader = RadialGradient(cx - r*0.25f, cy - r*0.25f, r*1.3f,
+              intArrayOf(C_LIQUID_1, C_LIQUID_2, C_LIQUID_3),
+              floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawCircle(cx, cy, r, pFill)
+          pFill.shader = null
+
+          // Stitched border inside vial
+          pStitch.strokeWidth = 1.8f
+          canvas.drawCircle(cx, cy, r - 5f, pStitch)
+
+          // Concentric rings (scope circles)
+          pStroke.color = Color.argb(90, 100, 160, 0); pStroke.strokeWidth = 1.5f
+          canvas.drawCircle(cx, cy, r * 0.30f, pStroke)
+          canvas.drawCircle(cx, cy, r * 0.62f, pStroke)
 
           // Crosshair lines
-          canvas.drawLine(cx - r + 6f, cy, cx + r - 6f, cy, crossPaint)
-          canvas.drawLine(cx, cy - r + 6f, cx, cy + r - 6f, crossPaint)
+          pStroke.color = Color.argb(110, 100, 160, 0); pStroke.strokeWidth = 2f
+          canvas.drawLine(cx - r + 8f, cy, cx + r - 8f, cy, pStroke)
+          canvas.drawLine(cx, cy - r + 8f, cx, cy + r - 8f, pStroke)
 
-          // Inner concentric circles (scope rings)
-          val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-              style = Paint.Style.STROKE; strokeWidth = 1.5f
-              color = Color.argb(130, 200, 255, 50)
+          // Bubble (2D: pitch + roll combined)
+          val maxOff = r * 0.68f
+          var bx = cx + (-roll  / 45f) * maxOff
+          var by = cy + (-pitch / 45f) * maxOff
+          val dist = hypot(bx - cx, by - cy)
+          if (dist > maxOff * 0.92f) {
+              val ang = atan2(by - cy, bx - cx)
+              bx = cx + cos(ang) * maxOff * 0.92f
+              by = cy + sin(ang) * maxOff * 0.92f
           }
-          canvas.drawCircle(cx, cy, r * 0.35f, ringPaint)
-          canvas.drawCircle(cx, cy, r * 0.65f, ringPaint)
+          drawOvalBubble(canvas, bx, by, r * 0.175f, r * 0.175f)
 
-          // Bubble position (2D — both pitch and roll)
-          val maxOff = r * 0.70f
-          val rawX = (-roll / 45f) * maxOff
-          val rawY = (-pitch / 45f) * maxOff
-          val dist = sqrt(rawX * rawX + rawY * rawY)
-          val bx: Float; val by: Float
-          if (dist > maxOff * 0.9f) {
-              bx = cx + rawX * (maxOff * 0.9f) / dist
-              by = cy + rawY * (maxOff * 0.9f) / dist
-          } else { bx = cx + rawX; by = cy + rawY }
-          drawBubble(canvas, bx, by, r * 0.18f, r * 0.22f)
-
-          // Glass sheen — upper-left arc
-          glassPaint.shader = RadialGradient(cx - r * 0.35f, cy - r * 0.35f, r * 0.8f,
-              intArrayOf(Color.argb(110, 255, 255, 255), Color.TRANSPARENT),
-              null, Shader.TileMode.CLAMP)
-          canvas.drawCircle(cx, cy, r, glassPaint)
-          glassPaint.shader = null
+          // Glass sheen (upper-left radial highlight)
+          pFill.shader = RadialGradient(cx - r*0.4f, cy - r*0.4f, r * 0.85f,
+              intArrayOf(Color.argb(130, 255, 255, 255), Color.argb(30, 255, 255, 255), Color.TRANSPARENT),
+              floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawCircle(cx, cy, r, pFill)
+          pFill.shader = null
       }
 
-      // ── Bubble (realistic oval) ───────────────────────────────────────────────
-      private fun drawBubble(canvas: Canvas, cx: Float, cy: Float, rx: Float, ry: Float) {
-          // Drop shadow
-          shadowPaint.color = Color.argb(80, 0, 0, 0)
-          canvas.drawOval(RectF(cx - rx + 3f, cy - ry + 4f, cx + rx + 3f, cy + ry + 4f), shadowPaint)
+      // ─── Oval bubble ──────────────────────────────────────────────────────────
+      private fun drawOvalBubble(canvas: Canvas, cx: Float, cy: Float, rx: Float, ry: Float) {
+          val oval = RectF(cx - rx, cy - ry, cx + rx, cy + ry)
 
-          // Bubble body gradient
-          val bGrad = RadialGradient(cx - rx * 0.3f, cy - ry * 0.3f, rx * 1.5f,
-              intArrayOf(Color.argb(220, 220, 255, 100), Color.argb(180, 160, 220, 0), Color.argb(60, 80, 130, 0)),
-              floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
-          val bPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; shader = bGrad }
-          canvas.drawOval(RectF(cx - rx, cy - ry, cx + rx, cy + ry), bPaint)
+          // Shadow
+          pFill.color = Color.argb(70, 0, 0, 0)
+          canvas.drawOval(RectF(cx-rx+3f, cy-ry+4f, cx+rx+3f, cy+ry+4f), pFill)
 
-          // Rim highlight
-          val rimP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-              style = Paint.Style.STROKE; strokeWidth = 1.5f
-              color = Color.argb(180, 200, 255, 80)
-          }
-          canvas.drawOval(RectF(cx - rx, cy - ry, cx + rx, cy + ry), rimP)
+          // Body
+          pFill.shader = RadialGradient(cx - rx*0.25f, cy - ry*0.25f, rx * 1.4f,
+              intArrayOf(Color.argb(230, 220, 255, 100), Color.argb(200, 155, 215, 0), Color.argb(80, 60, 100, 0)),
+              floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
+          canvas.drawOval(oval, pFill)
+          pFill.shader = null
+
+          // Outer rim
+          pStroke.color = Color.argb(160, 180, 240, 60); pStroke.strokeWidth = 1.5f; pStroke.pathEffect = null
+          canvas.drawOval(oval, pStroke)
 
           // White specular highlight (top-left)
-          val specGrad = RadialGradient(cx - rx * 0.3f, cy - ry * 0.5f, rx * 0.4f,
-              intArrayOf(Color.argb(200, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          val specP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; shader = specGrad }
-          canvas.drawOval(RectF(cx - rx * 0.65f, cy - ry * 0.85f, cx + rx * 0.1f, cy - ry * 0.1f), specP)
+          pFill.shader = RadialGradient(cx - rx*0.3f, cy - ry*0.5f, rx * 0.45f,
+              intArrayOf(Color.argb(210, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+          canvas.drawOval(RectF(cx-rx*0.75f, cy-ry*0.90f, cx+rx*0.15f, cy-ry*0.05f), pFill)
+          pFill.shader = null
+
+          // Small bottom reflection
+          pFill.shader = RadialGradient(cx + rx*0.2f, cy + ry*0.7f, rx*0.25f,
+              intArrayOf(Color.argb(80, 200, 255, 80), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+          canvas.drawOval(oval, pFill)
+          pFill.shader = null
       }
 
-      // ── LCD display ───────────────────────────────────────────────────────────
-      private fun drawLcdDisplay(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, roll: Float, pitch: Float) {
+      // ─── LCD display ──────────────────────────────────────────────────────────
+      private fun drawLCD(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, xDeg: Float, yDeg: Float) {
           val cr = (b - t) / 2f
-
-          // Casing
-          val casingP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = rimDark }
-          canvas.drawRoundRect(RectF(l - 4f, t - 4f, r + 4f, b + 4f), cr + 4f, cr + 4f, casingP)
-          rimPaint.color = rimGray; rimPaint.strokeWidth = 2f
-          canvas.drawRoundRect(RectF(l - 4f, t - 4f, r + 4f, b + 4f), cr + 4f, cr + 4f, rimPaint)
-
-          // LCD background
-          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, lcdBgPaint)
-
-          // Dim ghost digits background
-          lcdDimPaint.textSize = (b - t) * 0.58f
-          canvas.drawText("X: -88.8°  |  Y: -88.8°", (l + r) / 2f, b - (b - t) * 0.22f, lcdDimPaint)
-
-          // Real values
-          lcdTextPaint.textSize = (b - t) * 0.58f
-          val xStr = "X: %+.1f°".format(-roll)
-          val yStr = "Y: %+.1f°".format(pitch)
-          val divider = "  |  "
+          val outerRect = RectF(l - 6f, t - 6f, r + 6f, b + 6f)
+          val outerCr = cr + 6f
           val cx = (l + r) / 2f
-          canvas.drawText("$xStr$divider$yStr", cx, b - (b - t) * 0.22f, lcdTextPaint)
+          val textY = b - (b - t) * 0.20f
+
+          // Casing shadow
+          pFill.color = Color.argb(130, 0, 0, 0)
+          canvas.drawRoundRect(RectF(outerRect.left+4, outerRect.top+4, outerRect.right+4, outerRect.bottom+4), outerCr, outerCr, pFill)
+
+          // Metal casing
+          pFill.shader = LinearGradient(0f, outerRect.top, 0f, outerRect.bottom,
+              intArrayOf(C_BEZEL_1, C_BEZEL_2, C_BEZEL_3), floatArrayOf(0f,.5f,1f), Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(outerRect, outerCr, outerCr, pFill)
+          pFill.shader = null
+
+          // LCD panel
+          pFill.color = C_LCD_BG
+          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, pFill)
+
+          // Inner green glow
+          pFill.shader = RadialGradient(cx, (t+b)/2f, (r-l)*0.4f,
+              intArrayOf(Color.argb(30, 100, 200, 0), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, pFill)
+          pFill.shader = null
+
+          val ts = (b - t) * 0.60f
+
+          // Ghost/dim digits
+          pText.color = C_LCD_DIM; pText.textSize = ts
+          canvas.drawText("X: -88.8°  |  Y: -88.8°", cx, textY, pText)
+
+          // Live values
+          pText.color = C_LCD_TXT; pText.textSize = ts
+          canvas.drawText("X: %+.1f°  |  Y: %+.1f°".format(xDeg, yDeg), cx, textY, pText)
 
           // Glass sheen
-          glassPaint.shader = LinearGradient(0f, t, 0f, (t + b) / 2f,
-              intArrayOf(Color.argb(50, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(RectF(l, t, r, (t + b) / 2f), cr, cr, glassPaint)
-          glassPaint.shader = null
+          pFill.shader = LinearGradient(0f, t, 0f, (t+b)/2f,
+              intArrayOf(Color.argb(40, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(RectF(l+2f, t+2f, r-2f, (t+b)/2f), cr-1f, cr-1f, pFill)
+          pFill.shader = null
       }
 
-      // ── Bottom buttons ────────────────────────────────────────────────────────
+      // ─── Bottom buttons ────────────────────────────────────────────────────────
       private fun drawButtons(canvas: Canvas, l: Float, t: Float, r: Float, b: Float) {
-          val totalW = r - l
-          val btnSize = minOf((b - t), totalW / 4f - 12f)
-          val spacing = (totalW - btnSize * 4f) / 5f
-          val btnY = (t + b - btnSize) / 2f
-
-          val rects = listOf(btnCalibrate, btnSound, btnLock, btnSettings)
+          val gap = (r - l) / 20f
+          val size = (r - l - gap * 3f) / 4f
           for (i in 0..3) {
-              val bx = l + spacing + i * (btnSize + spacing)
-              rects[i].set(bx, btnY, bx + btnSize, btnY + btnSize)
+              val bx = l + i * (size + gap)
+              btnRects[i].set(bx, t, bx + size, b)
           }
-
-          // Draw each button
-          val cr = 12f
-          for ((i, rect) in rects.withIndex()) {
-              // Button shadow
-              shadowPaint.color = Color.argb(120, 0, 0, 0)
-              canvas.drawRoundRect(RectF(rect.left + 3f, rect.top + 3f, rect.right + 3f, rect.bottom + 3f), cr, cr, shadowPaint)
-
-              // Button body gradient
-              val bGrad = LinearGradient(0f, rect.top, 0f, rect.bottom,
-                  intArrayOf(Color.parseColor("#333333"), Color.parseColor("#1A1A1A")),
-                  null, Shader.TileMode.CLAMP)
-              btnPaint.shader = bGrad
-              canvas.drawRoundRect(rect, cr, cr, btnPaint)
-              btnPaint.shader = null
-
-              rimPaint.color = rimGray; rimPaint.strokeWidth = 1.5f
-              canvas.drawRoundRect(rect, cr, cr, rimPaint)
-
+          val cr = 14f
+          for ((i, rect) in btnRects.withIndex()) {
+              // Shadow
+              pFill.color = Color.argb(120, 0, 0, 0)
+              canvas.drawRoundRect(RectF(rect.left+3f, rect.top+3f, rect.right+3f, rect.bottom+3f), cr, cr, pFill)
+              // Gradient body
+              pFill.shader = LinearGradient(0f, rect.top, 0f, rect.bottom,
+                  intArrayOf(C_BTN_TOP, C_BTN_BOT), null, Shader.TileMode.CLAMP)
+              canvas.drawRoundRect(rect, cr, cr, pFill)
+              pFill.shader = null
+              // Border
+              pStroke.color = Color.parseColor("#3A3A3A"); pStroke.strokeWidth = 1.5f; pStroke.pathEffect = null
+              canvas.drawRoundRect(rect, cr, cr, pStroke)
+              // Top sheen
+              pFill.shader = LinearGradient(0f, rect.top, 0f, rect.top + (rect.bottom-rect.top)*0.4f,
+                  intArrayOf(Color.argb(50, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+              canvas.drawRoundRect(rect, cr, cr, pFill)
+              pFill.shader = null
               // Icon
-              val ic = rect.centerX(); val jc = rect.centerY(); val is2 = btnSize * 0.28f
-              iconPaint.strokeWidth = btnSize * 0.065f; iconPaint.strokeCap = Paint.Cap.ROUND
+              val ic = rect.centerX(); val jc = rect.centerY(); val s = size * 0.26f
+              pStroke.color = C_ICON; pStroke.strokeWidth = size * 0.064f; pStroke.strokeCap = Paint.Cap.ROUND
+              pStroke.pathEffect = null
               when (i) {
-                  0 -> drawCalibrateIcon(canvas, ic, jc, is2)
-                  1 -> drawSoundIcon(canvas, ic, jc, is2)
-                  2 -> drawLockIcon(canvas, ic, jc, is2)
-                  3 -> drawSettingsIcon(canvas, ic, jc, is2)
+                  0 -> drawIconCalibrate(canvas, ic, jc, s)
+                  1 -> drawIconSound(canvas, ic, jc, s)
+                  2 -> drawIconLock(canvas, ic, jc, s)
+                  3 -> drawIconGear(canvas, ic, jc, s)
               }
           }
       }
 
-      private fun drawCalibrateIcon(canvas: Canvas, cx: Float, cy: Float, s: Float) {
-          // Crosshair / target
-          canvas.drawCircle(cx, cy, s, iconPaint)
-          canvas.drawCircle(cx, cy, s * 0.4f, iconPaint)
-          canvas.drawLine(cx - s * 1.4f, cy, cx - s * 1.1f, cy, iconPaint)
-          canvas.drawLine(cx + s * 1.1f, cy, cx + s * 1.4f, cy, iconPaint)
-          canvas.drawLine(cx, cy - s * 1.4f, cx, cy - s * 1.1f, iconPaint)
-          canvas.drawLine(cx, cy + s * 1.1f, cx, cy + s * 1.4f, iconPaint)
+      private fun drawIconCalibrate(c: Canvas, cx: Float, cy: Float, s: Float) {
+          c.drawCircle(cx, cy, s, pStroke)
+          c.drawCircle(cx, cy, s * 0.38f, pStroke)
+          c.drawLine(cx - s*1.5f, cy, cx - s*1.08f, cy, pStroke)
+          c.drawLine(cx + s*1.08f, cy, cx + s*1.5f, cy, pStroke)
+          c.drawLine(cx, cy - s*1.5f, cx, cy - s*1.08f, pStroke)
+          c.drawLine(cx, cy + s*1.08f, cx, cy + s*1.5f, pStroke)
       }
 
-      private fun drawSoundIcon(canvas: Canvas, cx: Float, cy: Float, s: Float) {
-          // Speaker body
-          val path = Path()
-          path.moveTo(cx - s * 0.9f, cy - s * 0.4f)
-          path.lineTo(cx - s * 0.3f, cy - s * 0.4f)
-          path.lineTo(cx + s * 0.2f, cy - s * 0.9f)
-          path.lineTo(cx + s * 0.2f, cy + s * 0.9f)
-          path.lineTo(cx - s * 0.3f, cy + s * 0.4f)
-          path.lineTo(cx - s * 0.9f, cy + s * 0.4f)
-          path.close()
-          iconPaint.style = Paint.Style.STROKE
-          canvas.drawPath(path, iconPaint)
-          // Sound waves
+      private fun drawIconSound(c: Canvas, cx: Float, cy: Float, s: Float) {
+          val path = Path().also { p ->
+              p.moveTo(cx - s*0.9f, cy - s*0.45f)
+              p.lineTo(cx - s*0.2f, cy - s*0.45f)
+              p.lineTo(cx + s*0.35f, cy - s)
+              p.lineTo(cx + s*0.35f, cy + s)
+              p.lineTo(cx - s*0.2f, cy + s*0.45f)
+              p.lineTo(cx - s*0.9f, cy + s*0.45f)
+              p.close()
+          }
+          c.drawPath(path, pStroke)
           if (isSoundEnabled) {
-              for (arc in listOf(s * 0.6f, s * 1.0f)) {
-                  canvas.drawArc(RectF(cx + s * 0.1f, cy - arc, cx + s * 0.1f + arc * 2f, cy + arc), -60f, 120f, false, iconPaint)
-              }
-          }
-      }
-
-      private fun drawLockIcon(canvas: Canvas, cx: Float, cy: Float, s: Float) {
-          // Lock body
-          val bodyRect = RectF(cx - s * 0.7f, cy - s * 0.1f, cx + s * 0.7f, cy + s * 1.0f)
-          canvas.drawRoundRect(bodyRect, s * 0.2f, s * 0.2f, iconPaint)
-          // Shackle arc (open if not locked)
-          if (isLocked) {
-              canvas.drawArc(RectF(cx - s * 0.5f, cy - s * 1.0f, cx + s * 0.5f, cy + s * 0.1f), 180f, 180f, false, iconPaint)
+              c.drawArc(RectF(cx+s*0.25f, cy-s*0.7f, cx+s*1.65f, cy+s*0.7f), -50f, 100f, false, pStroke)
+              c.drawArc(RectF(cx+s*0.55f, cy-s*1.1f, cx+s*2.05f, cy+s*1.1f), -50f, 100f, false, pStroke)
           } else {
-              canvas.drawArc(RectF(cx - s * 0.1f, cy - s * 1.0f, cx + s * 0.9f, cy + s * 0.1f), 180f, 180f, false, iconPaint)
+              c.drawLine(cx+s*0.4f, cy-s*0.8f, cx+s*1.4f, cy+s*0.8f, pStroke)
+              c.drawLine(cx+s*1.4f, cy-s*0.8f, cx+s*0.4f, cy+s*0.8f, pStroke)
           }
-          // Keyhole dot
-          val kp = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = iconColor; style = Paint.Style.FILL }
-          canvas.drawCircle(cx, cy + s * 0.4f, s * 0.18f, kp)
       }
 
-      private fun drawSettingsIcon(canvas: Canvas, cx: Float, cy: Float, s: Float) {
-          // Gear — circle center + teeth
-          canvas.drawCircle(cx, cy, s * 0.45f, iconPaint)
-          canvas.drawCircle(cx, cy, s * 0.18f, iconPaint)
-          // 8 teeth
+      private fun drawIconLock(c: Canvas, cx: Float, cy: Float, s: Float) {
+          c.drawRoundRect(RectF(cx-s*0.75f, cy-s*0.05f, cx+s*0.75f, cy+s*1.05f), s*0.22f, s*0.22f, pStroke)
+          if (isLocked)
+              c.drawArc(RectF(cx-s*0.5f, cy-s*1.1f, cx+s*0.5f, cy+s*0.05f), 180f, 180f, false, pStroke)
+          else
+              c.drawArc(RectF(cx+s*0.0f, cy-s*1.1f, cx+s*1.0f, cy+s*0.05f), 180f, 180f, false, pStroke)
+          pFill.color = C_ICON
+          c.drawCircle(cx, cy + s*0.45f, s*0.18f, pFill)
+      }
+
+      private fun drawIconGear(c: Canvas, cx: Float, cy: Float, s: Float) {
+          c.drawCircle(cx, cy, s*0.5f, pStroke)
           for (i in 0..7) {
-              val angle = Math.toRadians(i * 45.0)
-              val innerR = s * 0.6f; val outerR = s * 1.0f
-              val x1 = cx + cos(angle).toFloat() * innerR
-              val y1 = cy + sin(angle).toFloat() * innerR
-              val x2 = cx + cos(angle).toFloat() * outerR
-              val y2 = cy + sin(angle).toFloat() * outerR
-              canvas.drawLine(x1, y1, x2, y2, iconPaint)
+              val a = Math.toRadians(i * 45.0)
+              c.drawLine(
+                  cx + cos(a).toFloat()*s*0.62f, cy + sin(a).toFloat()*s*0.62f,
+                  cx + cos(a).toFloat()*s*1.05f, cy + sin(a).toFloat()*s*1.05f, pStroke)
           }
       }
 
-      // ── Touch handling ────────────────────────────────────────────────────────
-      override fun onTouchEvent(event: MotionEvent): Boolean {
-          if (event.action == MotionEvent.ACTION_UP) {
-              val x = event.x; val y = event.y
-              when {
-                  btnCalibrate.contains(x, y) -> { onCalibrateClick?.invoke(); return true }
-                  btnSound.contains(x, y)     -> { onSoundClick?.invoke(); return true }
-                  btnLock.contains(x, y)      -> { onLockClick?.invoke(); return true }
-                  btnSettings.contains(x, y)  -> { onSettingsClick?.invoke(); return true }
-              }
+      // ─── Touch ────────────────────────────────────────────────────────────────
+      override fun onTouchEvent(ev: MotionEvent): Boolean {
+          if (ev.action == MotionEvent.ACTION_UP) {
+              val x = ev.x; val y = ev.y
+              if (btnRects[0].contains(x, y)) { onCalibrateClick?.invoke(); return true }
+              if (btnRects[1].contains(x, y)) { onSoundClick?.invoke();     return true }
+              if (btnRects[2].contains(x, y)) { onLockClick?.invoke();      return true }
+              if (btnRects[3].contains(x, y)) { onSettingsClick?.invoke();  return true }
           }
-          return super.onTouchEvent(event)
+          return super.onTouchEvent(ev)
       }
 
       fun updateAngles(pitch: Float, roll: Float) {
-          this.pitch = pitch
-          this.roll  = roll
-          invalidate()
+          this.pitch = pitch; this.roll = roll; invalidate()
       }
   }
   
