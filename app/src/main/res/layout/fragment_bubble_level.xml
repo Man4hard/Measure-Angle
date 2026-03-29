@@ -1,42 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#1A1A2E">
+  <FrameLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="#111111">
 
-    <com.inclinometer.app.ui.bubble.BubbleLevelView
-        android:id="@+id/bubble_level_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+      <com.inclinometer.app.ui.bubble.BubbleLevelView
+          android:id="@+id/bubble_level_view"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tv_pitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tv_roll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tv_demo_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="⚠ Demo Mode"
-        android:textColor="#F39C12"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="8dp" />
-
-</FrameLayout>
+  </FrameLayout>
+  
