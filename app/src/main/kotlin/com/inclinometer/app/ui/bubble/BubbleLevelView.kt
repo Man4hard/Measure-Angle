@@ -67,10 +67,19 @@ package com.inclinometer.app.ui.bubble
           drawLeather(canvas, W, H)
 
           val pad = W * 0.05f
+          val tThick = W * 0.22f // Bigger visual
 
-          // X and Y bars removed as requested
+          // Left Tube (Pitch)
+          drawVTube(canvas,
+              l = pad, t = pad,
+              r = pad + tThick, b = H * 0.70f,
+              pitch = pitch)
 
-          // 3 ── Circular vial removed to clear space
+          // Right Tube (Roll)
+          drawVTube(canvas,
+              l = W - pad - tThick, t = pad,
+              r = W - pad, b = H * 0.70f,
+              pitch = roll) // Using roll for the right tube
 
           // 4 ── LCD readout
           drawLCD(canvas,
