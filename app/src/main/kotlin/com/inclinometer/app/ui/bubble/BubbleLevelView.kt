@@ -66,25 +66,22 @@ package com.inclinometer.app.ui.bubble
           canvas.drawRect(0f, 0f, W, H, pFill)
           drawLeather(canvas, W, H)
 
-          val pad = W * 0.035f
+          val pad = W * 0.05f
+          val tThick = minOf(W, H) * 0.16f
 
-          // 1 ── Horizontal tube
+          // 1 ── Horizontal tube (Full width)
           drawHTube(canvas,
-              l = pad,   t = H * 0.030f,
-              r = W-pad, b = H * 0.185f,
+              l = pad,       t = pad,
+              r = W - pad,   b = pad + tThick,
               roll = roll)
 
-          // 2 ── Vertical tube
+          // 2 ── Vertical tube (Full height, centered)
           drawVTube(canvas,
-              l = pad,       t = H * 0.210f,
-              r = W * 0.235f, b = H * 0.695f,
+              l = W * 0.5f - tThick * 0.5f, t = pad * 2f + tThick,
+              r = W * 0.5f + tThick * 0.5f, b = H * 0.70f,
               pitch = pitch)
 
-          // 3 ── Circular vial
-          val vialCx = W * 0.630f
-          val vialCy = H * 0.455f
-          val vialR  = minOf(W * 0.305f, H * 0.250f)
-          drawCircle(canvas, vialCx, vialCy, vialR, pitch, roll)
+          // 3 ── Circular vial removed to clear space
 
           // 4 ── LCD readout
           drawLCD(canvas,
@@ -92,10 +89,10 @@ package com.inclinometer.app.ui.bubble
               r = W-pad, b = H * 0.800f,
               xDeg = -roll, yDeg = pitch)
 
-          // 5 ── Buttons
+          // 5 ── Buttons (Lock)
           drawButtons(canvas,
-              l = W * 0.055f, t = H * 0.860f,
-              r = W * 0.945f, b = H * 0.955f)
+              l = W * 0.055f, t = H * 0.820f,
+              r = W * 0.945f, b = H * 0.910f)
       }
 
       // ─── Leather background ────────────────────────────────────────────────────
