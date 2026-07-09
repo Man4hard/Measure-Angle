@@ -81,11 +81,6 @@ package com.inclinometer.app.ui.bubble
               r = W - pad, b = H * 0.70f,
               pitch = roll) // Using roll for the right tube
 
-          // 4 ── LCD readout
-          drawLCD(canvas,
-              l = pad,   t = H * 0.730f,
-              r = W-pad, b = H * 0.800f,
-              xDeg = -roll, yDeg = pitch)
 
           // 5 ── Buttons (Lock)
           drawButtons(canvas,
@@ -334,50 +329,6 @@ package com.inclinometer.app.ui.bubble
           pFill.shader = null
       }
 
-      // ─── LCD display ──────────────────────────────────────────────────────────
-      private fun drawLCD(canvas: Canvas, l: Float, t: Float, r: Float, b: Float, xDeg: Float, yDeg: Float) {
-          val cr = (b - t) / 2f
-          val outerRect = RectF(l - 6f, t - 6f, r + 6f, b + 6f)
-          val outerCr = cr + 6f
-          val cx = (l + r) / 2f
-          val textY = b - (b - t) * 0.20f
-
-          // Casing shadow
-          pFill.color = Color.argb(130, 0, 0, 0)
-          canvas.drawRoundRect(RectF(outerRect.left+4, outerRect.top+4, outerRect.right+4, outerRect.bottom+4), outerCr, outerCr, pFill)
-
-          // Metal casing
-          pFill.shader = LinearGradient(0f, outerRect.top, 0f, outerRect.bottom,
-              intArrayOf(C_BEZEL_1, C_BEZEL_2, C_BEZEL_3), floatArrayOf(0f,.5f,1f), Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(outerRect, outerCr, outerCr, pFill)
-          pFill.shader = null
-
-          // LCD panel
-          pFill.color = C_LCD_BG
-          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, pFill)
-
-          // Inner green glow
-          pFill.shader = RadialGradient(cx, (t+b)/2f, (r-l)*0.4f,
-              intArrayOf(Color.argb(30, 100, 200, 0), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(RectF(l, t, r, b), cr, cr, pFill)
-          pFill.shader = null
-
-          val ts = (b - t) * 0.60f
-
-          // Ghost/dim digits
-          pText.color = C_LCD_DIM; pText.textSize = ts
-          canvas.drawText("X: -88.8°  |  Y: -88.8°", cx, textY, pText)
-
-          // Live values
-          pText.color = C_LCD_TXT; pText.textSize = ts
-          canvas.drawText("X: %+.1f°  |  Y: %+.1f°".format(xDeg, yDeg), cx, textY, pText)
-
-          // Glass sheen
-          pFill.shader = LinearGradient(0f, t, 0f, (t+b)/2f,
-              intArrayOf(Color.argb(40, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-          canvas.drawRoundRect(RectF(l+2f, t+2f, r-2f, (t+b)/2f), cr-1f, cr-1f, pFill)
-          pFill.shader = null
-      }
 
       // ─── Bottom buttons ────────────────────────────────────────────────────────
       private fun drawButtons(canvas: Canvas, l: Float, t: Float, r: Float, b: Float) {
