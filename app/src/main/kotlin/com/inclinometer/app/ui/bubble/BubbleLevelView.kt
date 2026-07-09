@@ -153,6 +153,13 @@ package com.inclinometer.app.ui.bubble
           pStroke.color = Color.argb(100, 80, 120, 0); pStroke.strokeWidth = 1.5f
           canvas.drawLine(l + cr, cy, r - cr, cy, pStroke)
 
+          // Tick marks (visible black lines)
+          pStroke.color = Color.parseColor("#111111"); pStroke.strokeWidth = 6f
+          for (i in listOf(-0.05f, 0.05f)) {
+              val tx = cx + i * (r - l)
+              canvas.drawLine(tx, t + cr * 0.1f, tx, b - cr * 0.1f, pStroke)
+          }
+
           // Bubble
           val maxX = (r - l - cr * 4f) * 0.45f
           val bx = cx + (-roll / 45f * maxX).coerceIn(-maxX, maxX)
@@ -211,11 +218,11 @@ package com.inclinometer.app.ui.bubble
           pStroke.color = Color.argb(100, 80, 120, 0); pStroke.strokeWidth = 1.5f
           canvas.drawLine(cx, t + cr, cx, b - cr, pStroke)
 
-          // Tick marks
-          pStroke.color = Color.argb(80, 90, 130, 0); pStroke.strokeWidth = 1.5f
-          for (i in listOf(-0.25f, 0.25f)) {
+          // Tick marks (visible black lines)
+          pStroke.color = Color.parseColor("#111111"); pStroke.strokeWidth = 6f
+          for (i in listOf(-0.05f, 0.05f)) {
               val ty = cy + i * (b - t)
-              canvas.drawLine(l + cr * 0.5f, ty, r - cr * 0.5f, ty, pStroke)
+              canvas.drawLine(l + cr * 0.1f, ty, r - cr * 0.1f, ty, pStroke)
           }
 
           // Bubble
