@@ -69,17 +69,17 @@ package com.inclinometer.app.ui.bubble
           val pad = W * 0.05f
           val tThick = W * 0.22f // Bigger visual
 
+          // Top Tube (Roll)
+          drawHTube(canvas,
+              l = pad, t = pad,
+              r = W - pad, b = pad + tThick,
+              roll = roll)
+
           // Left Tube (Pitch)
           drawVTube(canvas,
-              l = pad, t = pad,
+              l = pad, t = pad * 2f + tThick,
               r = pad + tThick, b = H * 0.70f,
               pitch = pitch)
-
-          // Right Tube (Roll)
-          drawVTube(canvas,
-              l = W - pad - tThick, t = pad,
-              r = W - pad, b = H * 0.70f,
-              pitch = roll) // Using roll for the right tube
 
 
           // 5 ── Buttons (Lock)
