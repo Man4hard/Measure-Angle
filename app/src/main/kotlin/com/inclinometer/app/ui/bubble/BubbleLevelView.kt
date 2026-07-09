@@ -78,7 +78,7 @@ package com.inclinometer.app.ui.bubble
           // Left Tube (Pitch)
           drawVTube(canvas,
               l = pad, t = pad * 2f + tThick,
-              r = pad + tThick, b = H * 0.70f,
+              r = pad + tThick, b = H * 0.88f,
               pitch = pitch)
 
 
