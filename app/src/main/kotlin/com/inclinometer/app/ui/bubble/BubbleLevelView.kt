@@ -470,6 +470,7 @@ package com.inclinometer.app.ui.bubble
 
       // ─── Touch ────────────────────────────────────────────────────────────────
       override fun onTouchEvent(ev: MotionEvent): Boolean {
+          if (ev.action == MotionEvent.ACTION_DOWN) return true
           if (ev.action == MotionEvent.ACTION_UP) {
               val x = ev.x; val y = ev.y
               if (btnRects[0].contains(x, y)) { onCalibrateClick?.invoke(); return true }

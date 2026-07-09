@@ -1,27 +1,27 @@
 <resources>
-    <!-- Dark Theme -->
-    <color name="primary">#00D4FF</color>
-    <color name="on_primary">#001F2A</color>
-    <color name="primary_container">#003547</color>
-    <color name="secondary">#A8C8FF</color>
-    <color name="tertiary">#39E75F</color>
-    <color name="surface">#0D1117</color>
-    <color name="surface_variant">#161B22</color>
-    <color name="on_surface">#E6EDF3</color>
-    <color name="on_surface_variant">#8B949E</color>
-    <color name="error">#FF6B6B</color>
-    <color name="outline">#30363D</color>
+    <!-- Dark Theme (Neon Cyberpunk) -->
+    <color name="primary">#00E5FF</color>
+    <color name="on_primary">#00111A</color>
+    <color name="primary_container">#00334D</color>
+    <color name="secondary">#B300FF</color>
+    <color name="tertiary">#39FF14</color>
+    <color name="surface">#050505</color>
+    <color name="surface_variant">#111111</color>
+    <color name="on_surface">#E0E0E0</color>
+    <color name="on_surface_variant">#888888</color>
+    <color name="error">#FF3366</color>
+    <color name="outline">#222222</color>
 
-    <!-- Light Theme -->
+    <!-- Light Theme (Sleek Glassmorphic) -->
     <color name="primary_light">#0066CC</color>
     <color name="on_primary_light">#FFFFFF</color>
-    <color name="surface_light">#F6F8FA</color>
+    <color name="surface_light">#F0F2F5</color>
     <color name="surface_variant_light">#FFFFFF</color>
-    <color name="on_surface_light">#1C2128</color>
+    <color name="on_surface_light">#1A1A1A</color>
 
     <!-- Sensor states -->
-    <color name="level_green">#2ECC71</color>
-    <color name="warning_yellow">#F39C12</color>
-    <color name="danger_red">#E74C3C</color>
-    <color name="bubble_blue">#3498DB</color>
+    <color name="level_green">#39FF14</color>
+    <color name="warning_yellow">#FFEA00</color>
+    <color name="danger_red">#FF003C</color>
+    <color name="bubble_blue">#00E5FF</color>
 </resources>

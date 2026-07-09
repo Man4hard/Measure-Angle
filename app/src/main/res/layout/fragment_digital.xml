@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <!-- Status Bar -->
         <TextView
@@ -18,29 +18,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="● Sensor Active"
-            android:textSize="12sp"
-            android:layout_marginBottom="12dp" />
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp" />
 
         <!-- Pitch Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#0DFFFFFF"
+            app:strokeColor="?attr/colorPrimary"
+            app:strokeWidth="1dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="PITCH (X-AXIS)"
-                    android:textSize="11sp"
-                    android:letterSpacing="0.12"
+                    android:text="PITCH [X-AXIS]"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.2"
+                    android:fontFamily="monospace"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <TextView
@@ -48,15 +55,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0.00°"
-                    android:textSize="52sp"
+                    android:textSize="64sp"
                     android:textStyle="bold"
-                    android:fontFamily="monospace" />
+                    android:fontFamily="monospace"
+                    android:textColor="?attr/colorPrimary" />
 
-                <ProgressBar
+                <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progress_pitch"
-                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
+                    android:layout_height="wrap_content"
+                    app:trackCornerRadius="4dp"
+                    app:trackThickness="8dp"
+                    app:indicatorColor="?attr/colorPrimary"
+                    app:trackColor="#3300E5FF"
                     android:progress="50"
                     android:max="100" />
             </LinearLayout>
@@ -66,22 +77,26 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#0DFFFFFF"
+            app:strokeColor="?attr/colorSecondary"
+            app:strokeWidth="1dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ROLL (Y-AXIS)"
-                    android:textSize="11sp"
-                    android:letterSpacing="0.12"
+                    android:text="ROLL [Y-AXIS]"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.2"
+                    android:fontFamily="monospace"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <TextView
@@ -89,15 +104,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0.00°"
-                    android:textSize="52sp"
+                    android:textSize="64sp"
                     android:textStyle="bold"
-                    android:fontFamily="monospace" />
+                    android:fontFamily="monospace"
+                    android:textColor="?attr/colorSecondary" />
 
-                <ProgressBar
+                <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progress_roll"
-                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
+                    android:layout_height="wrap_content"
+                    app:trackCornerRadius="4dp"
+                    app:trackThickness="8dp"
+                    app:indicatorColor="?attr/colorSecondary"
+                    app:trackColor="#33B300FF"
                     android:progress="50"
                     android:max="100" />
             </LinearLayout>
@@ -107,9 +126,61 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#0DFFFFFF"
+            app:strokeColor="?attr/colorTertiary"
+            app:strokeWidth="1dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="YAW [HEADING]"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.2"
+                    android:fontFamily="monospace"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/tv_yaw_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.00°"
+                    android:textSize="64sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:textColor="?attr/colorTertiary" />
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progress_yaw"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:trackCornerRadius="4dp"
+                    app:trackThickness="8dp"
+                    app:indicatorColor="?attr/colorTertiary"
+                    app:trackColor="#3339FF14"
+                    android:progress="50"
+                    android:max="100" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Raw Accelerometer Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#05FFFFFF"
+            app:strokeColor="?attr/colorOutline"
+            app:strokeWidth="1dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -120,52 +191,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="YAW (Z-AXIS / HEADING)"
+                    android:text="ACCELEROMETER RAW"
                     android:textSize="11sp"
-                    android:letterSpacing="0.12"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <TextView
-                    android:id="@+id/tv_yaw_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0.00°"
-                    android:textSize="52sp"
-                    android:textStyle="bold"
-                    android:fontFamily="monospace" />
-
-                <ProgressBar
-                    android:id="@+id/progress_yaw"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:progress="50"
-                    android:max="100" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Raw Accelerometer Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RAW ACCELEROMETER"
-                    android:textSize="11sp"
-                    android:letterSpacing="0.12"
+                    android:letterSpacing="0.2"
+                    android:fontFamily="monospace"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="12dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -177,8 +208,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="X: 0.000 m/s²"
-                        android:textSize="12sp"
+                        android:text="X: 0.000"
+                        android:textSize="14sp"
                         android:fontFamily="monospace" />
 
                     <TextView
@@ -186,8 +217,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Y: 0.000 m/s²"
-                        android:textSize="12sp"
+                        android:text="Y: 0.000"
+                        android:textSize="14sp"
                         android:fontFamily="monospace" />
 
                     <TextView
@@ -195,8 +226,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Z: 9.810 m/s²"
-                        android:textSize="12sp"
+                        android:text="Z: 9.810"
+                        android:textSize="14sp"
                         android:fontFamily="monospace" />
                 </LinearLayout>
             </LinearLayout>
@@ -206,12 +237,15 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:text="SAVE MEASUREMENT"
-            android:textSize="14sp"
-            android:letterSpacing="0.08"
-            app:cornerRadius="12dp"
-            style="@style/Widget.MaterialComponents.Button" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.15"
+            android:fontFamily="monospace"
+            app:cornerRadius="32dp"
+            app:backgroundTint="?attr/colorPrimary"
+            android:textColor="?attr/colorOnPrimary" />
 
     </LinearLayout>
 </ScrollView>

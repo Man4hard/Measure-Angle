@@ -143,9 +143,9 @@ class SensorManagerHelper @Inject constructor(
     }
 
     private fun handleGyroscope(event: SensorEvent) {
-        gyroPitch = lowPass(event.values[1], gyroPitch, ALPHA_GYRO)
-        gyroRoll = lowPass(event.values[2], gyroRoll, ALPHA_GYRO)
-        gyroYaw = lowPass(event.values[0], gyroYaw, ALPHA_GYRO)
+        gyroPitch = lowPass(event.values[0], gyroPitch, ALPHA_GYRO)
+        gyroRoll = lowPass(event.values[1], gyroRoll, ALPHA_GYRO)
+        gyroYaw = lowPass(event.values[2], gyroYaw, ALPHA_GYRO)
 
         val dt = if (lastTimestamp == 0L) 0.02f else (event.timestamp - lastTimestamp) / 1_000_000_000f
         filteredYaw += gyroYaw * dt
