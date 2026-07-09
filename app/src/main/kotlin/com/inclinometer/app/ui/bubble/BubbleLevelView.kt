@@ -16,12 +16,9 @@ package com.inclinometer.app.ui.bubble
       var isSoundEnabled = true
       var isLocked       = false
 
-      var onCalibrateClick: (() -> Unit)? = null
-      var onSoundClick:     (() -> Unit)? = null
       var onLockClick:      (() -> Unit)? = null
-      var onSettingsClick:  (() -> Unit)? = null
 
-      private val btnRects = Array(4) { RectF() }
+      private val btnRects = Array(1) { RectF() }
 
       // ─── Palette (from reference image) ───────────────────────────────────────
       private val C_BG        = Color.parseColor("#0E0E0E")
@@ -382,70 +379,33 @@ package com.inclinometer.app.ui.bubble
 
       // ─── Bottom buttons ────────────────────────────────────────────────────────
       private fun drawButtons(canvas: Canvas, l: Float, t: Float, r: Float, b: Float) {
-          val gap = (r - l) / 20f
-          val size = (r - l - gap * 3f) / 4f
-          for (i in 0..3) {
-              val bx = l + i * (size + gap)
-              btnRects[i].set(bx, t, bx + size, b)
-          }
+          val size = (r - l) * 0.15f
+          val cx = (l + r) / 2f
+          btnRects[0].set(cx - size/2f, t, cx + size/2f, t + size)
+          
           val cr = 14f
-          for ((i, rect) in btnRects.withIndex()) {
-              // Shadow
-              pFill.color = Color.argb(120, 0, 0, 0)
-              canvas.drawRoundRect(RectF(rect.left+3f, rect.top+3f, rect.right+3f, rect.bottom+3f), cr, cr, pFill)
-              // Gradient body
-              pFill.shader = LinearGradient(0f, rect.top, 0f, rect.bottom,
-                  intArrayOf(C_BTN_TOP, C_BTN_BOT), null, Shader.TileMode.CLAMP)
-              canvas.drawRoundRect(rect, cr, cr, pFill)
-              pFill.shader = null
-              // Border
-              pStroke.color = Color.parseColor("#3A3A3A"); pStroke.strokeWidth = 1.5f; pStroke.pathEffect = null
-              canvas.drawRoundRect(rect, cr, cr, pStroke)
-              // Top sheen
-              pFill.shader = LinearGradient(0f, rect.top, 0f, rect.top + (rect.bottom-rect.top)*0.4f,
-                  intArrayOf(Color.argb(50, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
-              canvas.drawRoundRect(rect, cr, cr, pFill)
-              pFill.shader = null
-              // Icon
-              val ic = rect.centerX(); val jc = rect.centerY(); val s = size * 0.26f
-              pStroke.color = C_ICON; pStroke.strokeWidth = size * 0.064f; pStroke.strokeCap = Paint.Cap.ROUND
-              pStroke.pathEffect = null
-              when (i) {
-                  0 -> drawIconCalibrate(canvas, ic, jc, s)
-                  1 -> drawIconSound(canvas, ic, jc, s)
-                  2 -> drawIconLock(canvas, ic, jc, s)
-                  3 -> drawIconGear(canvas, ic, jc, s)
-              }
-          }
-      }
-
-      private fun drawIconCalibrate(c: Canvas, cx: Float, cy: Float, s: Float) {
-          c.drawCircle(cx, cy, s, pStroke)
-          c.drawCircle(cx, cy, s * 0.38f, pStroke)
-          c.drawLine(cx - s*1.5f, cy, cx - s*1.08f, cy, pStroke)
-          c.drawLine(cx + s*1.08f, cy, cx + s*1.5f, cy, pStroke)
-          c.drawLine(cx, cy - s*1.5f, cx, cy - s*1.08f, pStroke)
-          c.drawLine(cx, cy + s*1.08f, cx, cy + s*1.5f, pStroke)
-      }
-
-      private fun drawIconSound(c: Canvas, cx: Float, cy: Float, s: Float) {
-          val path = Path().also { p ->
-              p.moveTo(cx - s*0.9f, cy - s*0.45f)
-              p.lineTo(cx - s*0.2f, cy - s*0.45f)
-              p.lineTo(cx + s*0.35f, cy - s)
-              p.lineTo(cx + s*0.35f, cy + s)
-              p.lineTo(cx - s*0.2f, cy + s*0.45f)
-              p.lineTo(cx - s*0.9f, cy + s*0.45f)
-              p.close()
-          }
-          c.drawPath(path, pStroke)
-          if (isSoundEnabled) {
-              c.drawArc(RectF(cx+s*0.25f, cy-s*0.7f, cx+s*1.65f, cy+s*0.7f), -50f, 100f, false, pStroke)
-              c.drawArc(RectF(cx+s*0.55f, cy-s*1.1f, cx+s*2.05f, cy+s*1.1f), -50f, 100f, false, pStroke)
-          } else {
-              c.drawLine(cx+s*0.4f, cy-s*0.8f, cx+s*1.4f, cy+s*0.8f, pStroke)
-              c.drawLine(cx+s*1.4f, cy-s*0.8f, cx+s*0.4f, cy+s*0.8f, pStroke)
-          }
+          val rect = btnRects[0]
+          // Shadow
+          pFill.color = Color.argb(120, 0, 0, 0)
+          canvas.drawRoundRect(RectF(rect.left+3f, rect.top+3f, rect.right+3f, rect.bottom+3f), cr, cr, pFill)
+          // Gradient body
+          pFill.shader = LinearGradient(0f, rect.top, 0f, rect.bottom,
+              intArrayOf(C_BTN_TOP, C_BTN_BOT), null, Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(rect, cr, cr, pFill)
+          pFill.shader = null
+          // Border
+          pStroke.color = Color.parseColor("#3A3A3A"); pStroke.strokeWidth = 1.5f; pStroke.pathEffect = null
+          canvas.drawRoundRect(rect, cr, cr, pStroke)
+          // Top sheen
+          pFill.shader = LinearGradient(0f, rect.top, 0f, rect.top + (rect.bottom-rect.top)*0.4f,
+              intArrayOf(Color.argb(50, 255, 255, 255), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+          canvas.drawRoundRect(rect, cr, cr, pFill)
+          pFill.shader = null
+          // Icon
+          val ic = rect.centerX(); val jc = rect.centerY(); val s = size * 0.26f
+          pStroke.color = C_ICON; pStroke.strokeWidth = size * 0.064f; pStroke.strokeCap = Paint.Cap.ROUND
+          pStroke.pathEffect = null
+          drawIconLock(canvas, ic, jc, s)
       }
 
       private fun drawIconLock(c: Canvas, cx: Float, cy: Float, s: Float) {
@@ -458,25 +418,13 @@ package com.inclinometer.app.ui.bubble
           c.drawCircle(cx, cy + s*0.45f, s*0.18f, pFill)
       }
 
-      private fun drawIconGear(c: Canvas, cx: Float, cy: Float, s: Float) {
-          c.drawCircle(cx, cy, s*0.5f, pStroke)
-          for (i in 0..7) {
-              val a = Math.toRadians(i * 45.0)
-              c.drawLine(
-                  cx + cos(a).toFloat()*s*0.62f, cy + sin(a).toFloat()*s*0.62f,
-                  cx + cos(a).toFloat()*s*1.05f, cy + sin(a).toFloat()*s*1.05f, pStroke)
-          }
-      }
 
       // ─── Touch ────────────────────────────────────────────────────────────────
       override fun onTouchEvent(ev: MotionEvent): Boolean {
           if (ev.action == MotionEvent.ACTION_DOWN) return true
           if (ev.action == MotionEvent.ACTION_UP) {
               val x = ev.x; val y = ev.y
-              if (btnRects[0].contains(x, y)) { onCalibrateClick?.invoke(); return true }
-              if (btnRects[1].contains(x, y)) { onSoundClick?.invoke();     return true }
-              if (btnRects[2].contains(x, y)) { onLockClick?.invoke();      return true }
-              if (btnRects[3].contains(x, y)) { onSettingsClick?.invoke();  return true }
+              if (btnRects[0].contains(x, y)) { onLockClick?.invoke(); return true }
           }
           return super.onTouchEvent(ev)
       }
